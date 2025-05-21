@@ -1,0 +1,38 @@
+{
+  "name": "triptales_backend",
+  "version": "1.0.0",
+  "description": "BE for trip Tales project using Nodejs Mongodb",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rahul218691/TripTales_Backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Rahul218691/TripTales_Backend/issues"
+  },
+  "homepage": "https://github.com/Rahul218691/TripTales_Backend#readme",
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  },
+  "dependencies": {
+    "cloudinary": "^2.6.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "express-rate-limit": "^7.5.0",
+    "google-auth-library": "^9.15.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.15.0",
+    "morgan": "^1.10.0",
+    "multer": "^2.0.0"
+  }
+}
