@@ -4,7 +4,7 @@ const { googleSignInUser, logoutUser, refreshUserToken } = require('./controller
 // ============================================== AUTH APIS ====================================================================================== //
 
 router.post('/api/login', googleSignInUser)
-router.post('/api/refreshToken', refreshUserToken)
+router.get('/api/refreshToken', refreshUserToken)
 router.post('/api/logout', logoutUser)
 
 // =============================================================================================================================================== //
