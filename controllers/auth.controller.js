@@ -43,11 +43,17 @@ class AuthController {
             // Set cookies for tokens
             res.cookie('triptale_refreshToken', refreshToken, {
                 maxAge: 1000 * 60 * 60 * 24 * 30,
-                httpOnly: true
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None',
+                path: '/'
             })
             res.cookie('triptale_accessToken', accessToken, {
                 maxAge: 1000 * 60 * 60 * 24 * 30,
-                httpOnly: true
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None',
+                path: '/'
             })
 
             // Send response with user data
@@ -85,11 +91,17 @@ class AuthController {
 
             res.cookie('triptale_refreshToken', refreshToken, {
                 maxAge: 1000 * 60 * 60 * 24 * 30,
-                httpOnly: true
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None',
+                path: '/'
             })
             res.cookie('triptale_accessToken', accessToken, {
                 maxAge: 1000 * 60 * 60 * 24 * 30,
-                httpOnly: true
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None',
+                path: '/'
             })
 
             const userDto = new UserDto(user)
