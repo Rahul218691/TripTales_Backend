@@ -1,5 +1,5 @@
 const { HttpError } = require('../utils')
-const { uploadImage } = require('../helpers/upload.helper')
+const { uploadImage, deleteResource } = require('../helpers/upload.helper')
 const UserDto = require('../dtos/user.dto')
 const { updateUser, findUser } = require('../services/user.services')
 
@@ -14,6 +14,10 @@ class UserController {
             const payload = {
                 username,
                 bio
+            }
+            const userInfo = await findUser({ _id: user._id })
+            if (userInfo.profileImgId) {
+                await deleteResource([userInfo.profileImgId])
             }
             if (file) {
                 const result = await uploadImage(file, 'TripTales/profile')
