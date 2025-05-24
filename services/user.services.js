@@ -22,6 +22,19 @@ class Userservice {
             }
         })
     }
+
+    updateUser(data, id) {
+        return new Promise(async(resolve, reject) => {
+            try {
+                const updated = await User.findByIdAndUpdate(id, data, {
+                    new: true
+                })
+                resolve(updated)
+            } catch (error) {
+                reject(error)
+            }
+        })
+    }
 }
 
 module.exports = new Userservice()

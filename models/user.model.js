@@ -31,6 +31,10 @@ const userSchema = new Schema({
         enum: ['admin', 'user'],
         default: 'user'
     },
+    bio: {
+        type: String,
+        default: ''
+    },
     feedbacks: []
 }, {
     timestamps: true

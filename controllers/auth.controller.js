@@ -34,7 +34,8 @@ class AuthController {
                 usertype: user.usertype,
                 profileImg: user.profileImg,
                 profileImgSecureUrl: user.profileImgSecureUrl,
-                username: user.username
+                username: user.username,
+                bio: user.bio
             })
 
             // Store refresh token in the database
@@ -84,7 +85,8 @@ class AuthController {
                 usertype: user.usertype,
                 profileImg: user.profileImg,
                 profileImgSecureUrl: user.profileImgSecureUrl,
-                username: user.username
+                username: user.username,
+                bio: user.bio
             })
 
             await updateUserRefreshToken(refreshToken, user._id)
