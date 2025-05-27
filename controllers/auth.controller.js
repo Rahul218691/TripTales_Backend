@@ -128,6 +128,27 @@ class AuthController {
             next(error)
         }
     }
+
+    async createTestToken(req, res, next) {
+        try {
+            const { id } = req.params
+            const user = await findUser({ _id: id })
+            if (!user) return next(new HttpError('User not found', 401))
+
+            const { accessToken } = await generateTokens({
+                _id: user._id,
+                email: user.email,
+                usertype: user.usertype,
+                profileImg: user.profileImg,
+                profileImgSecureUrl: user.profileImgSecureUrl,
+                username: user.username,
+                bio: user.bio
+            })
+            res.json(accessToken)
+        } catch (error) {
+            next(error)
+        }
+    }
 }
 
 module.exports = new AuthController()

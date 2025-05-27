@@ -8,7 +8,8 @@ const morgan = require('morgan')
 
 const { logErrorToFile } = require('./utils')
 const routes = require('./routes')
-const connectDB = require('./services/db')
+const { connectDB, agenda } = require('./services/db')
+require('./services/agendaJobs/createStoryAgenda') // Import the job definition
 
 const app = express()
 
@@ -18,6 +19,21 @@ const limiter = ratelimit({
     legacyHeaders: false,
     message: 'Too many requests from this IP, please try again later.'
 })
+
+  
+agenda.on('start', (job) => {
+    console.log(`Job ${job.attrs.name} started`);
+});
+
+agenda.on('complete', (job) => {
+    console.log(`Job ${job.attrs.name} completed`);
+});
+
+agenda.on('fail', (err, job) => {
+    console.error(`Job ${job.attrs.name} failed with error: ${err.message}`);
+});
+
+
 app.set('trust proxy', true); 
 app.use(helmet())
 app.use(cors({
@@ -73,5 +89,10 @@ const PORT = process.env.PORT || 5000
 
 app.listen(PORT, () => {
     console.log(`Server Running on PORT ${PORT}`)
-    connectDB()
+    connectDB().then(() => {
+        (async function() {
+            await agenda.start();
+            console.log('Agenda started for job processing.');
+        })();
+    })
 })
