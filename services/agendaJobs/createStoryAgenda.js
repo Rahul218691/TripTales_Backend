@@ -2,6 +2,8 @@ const TravelStoryModel = require('../../models/story.model');
 const { agenda } = require('../db')
 const { calculateReadTime } = require('../../utils');
 const { uploadImage } = require('../../helpers/upload.helper');
+const { pusher } = require('../../helpers/pusher.helper')
+const fs = require('fs').promises;
 
 agenda.define('process travel story', {
     concurrency: 1,
@@ -25,6 +27,9 @@ agenda.define('process travel story', {
         coverImageBuffer,
         storyImagesBuffers,
         videosBuffers,
+        coverImagePath,
+        storyImagesPaths,
+        videosPaths,
         highlights,
         storyType
     } = job.attrs.data;
@@ -36,6 +41,7 @@ agenda.define('process travel story', {
         if (coverImageBuffer) {
             let result = await uploadImage(coverImageBuffer, 'TripTales/coverImages')
             const { public_id, secure_url, url } = result[0]
+            await fs.unlink(coverImagePath)
             coverImage = {
                 publicId: public_id,
                 secureUrl: secure_url,
@@ -44,6 +50,7 @@ agenda.define('process travel story', {
         }
 
         const storyImages = await uploadImage(storyImagesBuffers, 'TripTales/storyImages')
+        storyImagesPaths.map(async(path) => await fs.unlink(path))
         const images = storyImages.map((img, i) => {
             return {
                 url: img.url,
@@ -55,7 +62,7 @@ agenda.define('process travel story', {
         if (videosBuffers) {
             storyVideos = await uploadImage(videosBuffers, 'TripTales/storyVideos')
         }
-
+        videosPaths.map(async(path) => await fs.unlink(path))
         const videos = storyVideos.map((video, i) => {
             return {
                 url: video.url,
@@ -87,13 +94,23 @@ agenda.define('process travel story', {
         console.log(`Agenda: Story "${savedStory.title}" processed and saved successfully!`);
 
         // You can update job progress or complete it if needed
-        // job.reportProgress({ status: 'completed', storyId: savedStory._id });
+
         job.attrs.data.progress = { status: 'completed', storyId: savedStory._id };
         await job.save();
         // Code to notify users here
+        const channel = `trip_tales_mystory_${userId}`
+        pusher.trigger(channel, 'story_creation', {
+            message: {
+                text: 'Story Published Successfully',
+                storyId: savedStory._id
+            }
+        })
 
     } catch (error) {
         console.error('Agenda: Error processing story job:', error);
+        storyImagesPaths.map(async(path) => await fs.unlink(path))
+        videosPaths.map(async(path) => await fs.unlink(path))
+        await fs.unlink(coverImagePath)
         // Agenda will automatically retry based on its configuration
         job.fail(error.message); // Mark job as failed
         await job.save();

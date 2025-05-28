@@ -1,8 +1,30 @@
 const multer = require('multer')
 const cloudinary = require('cloudinary').v2;
+const path = require('path')
 
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+
+const diskStore = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, path.join(__dirname, '../uploads'))
+    },
+    filename: (req, file, cb) => {
+        // Set the filename to include the original name and a timestamp
+        const uniqueSuffix = `${Date.now()}-${file.originalname}`;
+        cb(null, uniqueSuffix);
+    }
+})
+
+const upload = multer({ storage: storage, limits: {
+    fileSize: 50 * 1024 * 1024 // 50 MB per file
+}});
+
+const diskUpload = multer({
+    storage: diskStore,
+    limits: {
+        fileSize: 50 * 1024 * 1024
+    }
+})
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -60,5 +82,6 @@ const deleteResource = (publicIds) => {
 module.exports = {
     upload,
     uploadImage,
-    deleteResource
+    deleteResource,
+    diskUpload
 }

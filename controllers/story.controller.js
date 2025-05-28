@@ -1,5 +1,6 @@
 const { HttpError } = require('../utils')
 const { agenda } = require('../services/db')
+const fs = require('fs').promises;
 
 class StoryController {
     async createStory (req, res, next) {
@@ -22,29 +23,29 @@ class StoryController {
                 return next(new HttpError('All fields are required', 400))
              }
 
-             const coverImageBuffer = req.files?.coverImage?.[0]?.buffer || null;
-             const storyImagesBuffers = req.files?.storyImages?.map(file => file.buffer) || [];
-             const videosBuffers = req.files?.storyVideos?.map(file => file.buffer) || [];
+            const coverImagePath = req.files?.coverImage?.[0]?.path || null;
+            const storyImagesPaths = req.files?.storyImages?.map(file => file.path) || [];
+            const videosPaths = req.files?.storyVideos?.map(file => file.path) || [];
 
-            if (!coverImageBuffer) {
-                return next(new HttpError('cover image is required', 400))
+            if (!coverImagePath) {
+                return next(new HttpError('Cover image is required', 400));
             }
 
-            if (!storyImagesBuffers || storyImagesBuffers.length === 0) {
-                return next(new HttpError('At least one story image is required', 400))
+            if (!storyImagesPaths || storyImagesPaths.length === 0) {
+                return next(new HttpError('At least one story image is required', 400));
             }
-            if (videosBuffers && videosBuffers.length > 5) {
-                return next(new HttpError('You can upload a maximum of 5 videos', 400))
+
+            if (videosPaths && videosPaths.length > 5) {
+                return next(new HttpError('You can upload a maximum of 5 videos', 400));
             }
-            if (coverImageBuffer && coverImageBuffer.size > 5 * 1024 * 1024) {
-                return next(new HttpError('Cover image size should not exceed 5MB', 400))
-            }
-            if (storyImagesBuffers.some(image => image.size > 5 * 1024 * 1024)) {
-                return next(new HttpError('Story images size should not exceed 5MB each', 400))
-            }
-            if (videosBuffers && videosBuffers.some(video => video.size > 50 * 1024 * 1024)) {
-                return next(new HttpError('Videos size should not exceed 50MB each', 400))
-            }
+
+            const coverImageBuffer = coverImagePath ? await fs.readFile(coverImagePath) : null;
+            const storyImagesBuffers = await Promise.all(
+                storyImagesPaths.map(async (imagePath) => await fs.readFile(imagePath))
+            );
+            const videosBuffers = await Promise.all(
+                videosPaths.map(async (videoPath) => await fs.readFile(videoPath))
+            );
 
             const jobData = {
                 title,
@@ -60,6 +61,9 @@ class StoryController {
                 coverImageBuffer,
                 storyImagesBuffers,
                 videosBuffers,
+                coverImagePath,
+                storyImagesPaths,
+                videosPaths,
                 highlights: highlights ? JSON.parse(highlights) : [],
                 storyType
             }

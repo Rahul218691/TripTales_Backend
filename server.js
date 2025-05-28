@@ -5,6 +5,7 @@ const cors = require('cors')
 const cookieParser = require('cookie-parser')
 const ratelimit = require('express-rate-limit')
 const morgan = require('morgan')
+const path = require('path')
 
 const { logErrorToFile } = require('./utils')
 const routes = require('./routes')
@@ -41,6 +42,9 @@ app.use(cors({
     credentials: true
 }))
 app.use(express.json())
+app.use(express.urlencoded({ limit: '55mb', extended: true }));
+app.use(express.static(path.join(__dirname, 'uploads')))
+
 app.use(cookieParser())
 app.use(morgan('dev'))
 app.use(limiter)
