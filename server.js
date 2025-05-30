@@ -43,7 +43,10 @@ app.use(cors({
 }))
 app.use(express.json())
 app.use(express.urlencoded({ limit: '55mb', extended: true }));
-app.use(express.static(path.join(__dirname, 'uploads')))
+
+if (process.env.ENVIRONMENT === 'development') {
+    app.use(express.static(path.join(__dirname, 'uploads')))
+}
 
 app.use(cookieParser())
 app.use(morgan('dev'))

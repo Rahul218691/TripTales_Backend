@@ -1,12 +1,24 @@
 const multer = require('multer')
 const cloudinary = require('cloudinary').v2;
 const path = require('path')
+const fs = require('fs')
+
+const isDevelopment = process.env.ENVIRONMENT === 'development';
+
+const uploadPath = !isDevelopment
+  ? '/tmp/uploads'
+  : path.join(__dirname, '../uploads');
+
+// Ensure the upload folder exists
+if (!fs.existsSync(uploadPath)) {
+  fs.mkdirSync(uploadPath, { recursive: true });
+}
 
 const storage = multer.memoryStorage();
 
 const diskStore = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, '../uploads'))
+        cb(null, uploadPath);
     },
     filename: (req, file, cb) => {
         // Set the filename to include the original name and a timestamp
