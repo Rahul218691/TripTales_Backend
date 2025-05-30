@@ -24,7 +24,7 @@ router.post('/api/profile/update', authMiddleware, upload.single('profile'), upd
 
 // ============================================== Story APIS ====================================================================================== //
 
-router.post('/api/create/story', testMiddleware, diskUpload.fields([
+router.post('/api/create/story', authMiddleware, diskUpload.fields([
     { name: 'coverImage', maxCount: 1 },
     { name: 'storyImages', maxCount: 10 },
     { name: 'storyVideos', maxCount: 5 }
