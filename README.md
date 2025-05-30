@@ -8,6 +8,7 @@ TripTales is a backend service designed to support a travel storytelling applica
 - **Express.js**
 - **MongoDB**
 - **MongoDB Agenda** (Background Job Worker)
+- **Pusher** (To Notify the Post creation or any other notifications in real time)
 
 ## 🌐 Deployment
 
