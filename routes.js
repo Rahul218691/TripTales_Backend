@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { googleSignInUser, logoutUser, refreshUserToken, createTestToken } = require('./controllers/auth.controller');
-const { createStory } = require('./controllers/story.controller');
+const { createStory, getStoryDetails, updateStoryViewCount, updateStoryLikeCount, getStoriesList, addStoryComment, getStoryComments, addStoryToSaved, deleteStoryComment } = require('./controllers/story.controller');
 const { updateUserProfile, getUserProfile } = require('./controllers/user.controller');
 const { upload, diskUpload } = require('./helpers/upload.helper');
 const authMiddleware = require('./middlewares/auth.middleware')
@@ -24,11 +24,21 @@ router.post('/api/profile/update', authMiddleware, upload.single('profile'), upd
 
 // ============================================== Story APIS ====================================================================================== //
 
-router.post('/api/create/story', authMiddleware, diskUpload.fields([
+router.post('/api/create/story', testMiddleware, diskUpload.fields([
     { name: 'coverImage', maxCount: 1 },
     { name: 'storyImages', maxCount: 10 },
     { name: 'storyVideos', maxCount: 5 }
 ]), createStory)
+
+router.get('/api/story/:id', getStoryDetails)
+router.patch('/api/story/view', updateStoryViewCount)
+router.patch('/api/story/like/:id', authMiddleware, updateStoryLikeCount)
+router.get('/api/stories', getStoriesList)
+
+router.post('/api/create/comment', authMiddleware, addStoryComment)
+router.get('/api/comments/:id', getStoryComments)
+router.post('/api/story/save', authMiddleware, addStoryToSaved)
+router.delete('/api/delete/comment/:storyId/:commentId', authMiddleware, deleteStoryComment)
 
 // ================================================================================================================================================ //
 module.exports = router

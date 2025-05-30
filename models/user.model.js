@@ -35,7 +35,13 @@ const userSchema = new Schema({
         type: String,
         default: ''
     },
-    feedbacks: []
+    feedbacks: [],
+    saved: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Story'
+        }
+    ]
 }, {
     timestamps: true
 })

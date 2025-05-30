@@ -49,6 +49,18 @@ const storySchema = new Schema({
         type: String,
         required: true
     },
+    likes: {
+        type: Number,
+        default: 0
+    },
+    totalComments: {
+        type: Number,
+        default: 0
+    },
+    views: {
+        type: Number,
+        default: 0
+    },
     tripType: {
         type: String,
         enum: ['solo', 'couple', 'family', 'friends', 'backpacking', 'adventure', 'luxury', 'cultural', 'business', 'girls trip',
