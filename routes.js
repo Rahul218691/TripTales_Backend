@@ -31,7 +31,7 @@ router.post('/api/create/story', authMiddleware, diskUpload.fields([
 ]), createStory)
 
 router.get('/api/story/:id', getStoryDetails)
-router.patch('/api/story/view', updateStoryViewCount)
+router.patch('/api/story/view/:id', updateStoryViewCount)
 router.patch('/api/story/like/:id', authMiddleware, updateStoryLikeCount)
 router.get('/api/stories', getStoriesList)
 
