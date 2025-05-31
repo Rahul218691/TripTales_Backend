@@ -66,6 +66,7 @@ const UserSchema = require('../models/user.model')
                             }
                         },
                         createdBy: {
+                            _id: "$createdByDetails._id",
                             username: '$createdByDetails.username',
                             profileImg: '$createdByDetails.profileImg',
                             profileImgSecureUrl: '$createdByDetails.profileImgSecureUrl'
@@ -174,6 +175,7 @@ const getStories = (page, limit, filters) => {
                         secureUrl: '$coverImage.secureUrl'
                     },
                     createdBy: {
+                        _id: "$createdByDetails._id",
                         username: '$createdByDetails.username',
                         profileImg: '$createdByDetails.profileImg',
                         profileImgSecureUrl: '$createdByDetails.profileImgSecureUrl'
@@ -267,6 +269,7 @@ const getComments = (page, limit, storyId) => {
                     $project: {
                         content: 1,
                         createdBy: {
+                            _id: "$createdByDetails._id",
                             username: '$createdByDetails.username',
                             profileImg: '$createdByDetails.profileImg',
                             profileImgSecureUrl: '$createdByDetails.profileImgSecureUrl'
