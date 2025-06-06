@@ -81,7 +81,7 @@ class StoryController {
     async getStoryDetails (req, res, next) {
         try {
             const { id } = req.params
-            const user = req.user._id || null
+            const user = req?.user?._id || null
             if (!id) {
                 return next(new HttpError('Story ID is required', 400))
             }
