@@ -49,10 +49,12 @@ const storySchema = new Schema({
         type: String,
         required: true
     },
-    likes: {
-        type: Number,
-        default: 0
-    },
+    likes: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'User'
+        }
+    ],
     totalComments: {
         type: Number,
         default: 0

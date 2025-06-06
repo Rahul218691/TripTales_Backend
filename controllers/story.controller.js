@@ -81,10 +81,11 @@ class StoryController {
     async getStoryDetails (req, res, next) {
         try {
             const { id } = req.params
+            const user = req.user._id || null
             if (!id) {
                 return next(new HttpError('Story ID is required', 400))
             }
-            const result = await getStory(id)
+            const result = await getStory(id, user)
             return res.status(200).json(result)
         } catch (error) {
             next(error)
@@ -107,10 +108,11 @@ class StoryController {
     async updateStoryLikeCount (req, res, next) {
         try {
             const { id } = req.params
+            const userId = req.user._id
             if (!id) {
                 return next(new HttpError('Story ID is required', 400))
             }
-            await addStoryLike(id)
+            await addStoryLike(id, userId)
             return res.status(204).send()
         } catch (error) {
             next(error)

@@ -3,7 +3,7 @@ const StorySchema = require('../models/story.model')
 const CommentSchema = require('../models/comment.model')
 const UserSchema = require('../models/user.model')
 
- const getStory = (id) => {
+ const getStory = (id, userId) => {
     return new Promise(async(resolve, reject) => {
         try {
             const story = await StorySchema.aggregate([
@@ -33,7 +33,14 @@ const UserSchema = require('../models/user.model')
                         budget: 1,
                         travelDate: 1,
                         storyReadTime: 1,
-                        likes: 1,
+                        likes: { $size: "$likes" },
+                        hasLiked: {
+                            $cond: {
+                                if: { $and: [userId ? { $in: [new mongoose.Types.ObjectId(String(userId)), "$likes"] } : false] },
+                                then: true,
+                                else: false
+                            }
+                        },
                         views: 1,
                         tripType: 1,
                         transportation: 1,
@@ -96,13 +103,35 @@ const updateViewCount = (id) => {
     })
 }
 
-const addStoryLike = (id) => {
-    return new Promise(async(resolve, reject) => {
+const addStoryLike = (storyId, userId) => {
+    return new Promise(async (resolve, reject) => {
         try {
-            await StorySchema.findByIdAndUpdate(id, { $inc: { likes: 1 } })
-            resolve(true)
+            // Perform a single atomic update
+            const updatedStory = await StorySchema.findOneAndUpdate(
+                { _id: storyId },
+                [
+                    {
+                        $set: {
+                            likes: {
+                                $cond: {
+                                    if: { $in: [userId, '$likes'] }, // Check if userId exists in the likes array
+                                    then: { $setDifference: ['$likes', [userId]] }, // Remove userId
+                                    else: { $concatArrays: ['$likes', [userId]] } // Add userId
+                                }
+                            }
+                        }
+                    }
+                ],
+                { new: true } // Return the updated document
+            );
+
+            if (!updatedStory) {
+                return reject(new Error('Story not found'));
+            }
+
+            resolve(updatedStory);
         } catch (error) {
-            reject(error)
+            reject(error);
         }
     })
 }
@@ -166,7 +195,7 @@ const getStories = (page, limit, filters) => {
                     title: 1,
                     location: 1,
                     storyReadTime: 1,
-                    likes: 1,
+                    likes: { $size: '$likes' },
                     views: 1,
                     totalComments: 1,
                     createdAt: 1,
@@ -228,7 +257,7 @@ const addComment = (data) => {
     return new Promise(async(resolve, reject) => {
         try {
             const comment = await CommentSchema.create(data)
-            await UserSchema.findByIdAndUpdate(data.userId, { $inc: { totalComments: 1 } })
+            await StorySchema.findByIdAndUpdate(data.storyId, { $inc: { totalComments: 1 } })
             resolve(comment)
         } catch (error) {
             reject(error)
@@ -268,6 +297,7 @@ const getComments = (page, limit, storyId) => {
                 {
                     $project: {
                         content: 1,
+                        createdAt: 1,
                         createdBy: {
                             _id: "$createdByDetails._id",
                             username: '$createdByDetails.username',
