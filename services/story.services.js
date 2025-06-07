@@ -36,7 +36,7 @@ const UserSchema = require('../models/user.model')
                         likes: { $size: "$likes" },
                         hasLiked: {
                             $cond: {
-                                if: { $and: [userId ? { $in: [new mongoose.Types.ObjectId(String(userId)), "$likes"] } : false] },
+                                if: { $and: [userId ? { $in: [String(userId), "$likes"] } : false] },
                                 then: true,
                                 else: false
                             }
@@ -320,6 +320,7 @@ const getComments = (page, limit, storyId) => {
                 {
                     $project: {
                         items: '$comments',
+                        totalComments: { $arrayElemAt: ['$totalCount.count', 0] }, // Extract total count
                         totalPages: {
                             $cond: {
                                 if: { 

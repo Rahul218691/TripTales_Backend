@@ -6,6 +6,10 @@ class UserDto {
     profileImgSecureUrl;
     usertype;
     bio;
+    totalStories;
+    totalTrips;
+    followers;
+    following;
 
     constructor(user) {
         this._id = user._id
@@ -16,6 +20,10 @@ class UserDto {
         this.usertype = user.usertype
         this.profileImg = user.profileImg
         this.bio = user.bio
+        this.totalStories = user.totalStories || 0
+        this.totalTrips = user.totalTrips || 0
+        this.followers = user.followers.length || 0
+        this.following = user.following.length || 0
     }       
 }
 

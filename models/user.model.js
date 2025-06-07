@@ -41,6 +41,26 @@ const userSchema = new Schema({
             type: Schema.Types.ObjectId,
             ref: 'Story'
         }
+    ],
+    totalStories: {
+        type: Number,
+        default: 0
+    },
+    totalTrips: {
+        type: Number,
+        default: 0
+    },
+    followers: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'User'
+        }
+    ],
+    following: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'User'
+        }
     ]
 }, {
     timestamps: true

@@ -1,4 +1,5 @@
 const TravelStoryModel = require('../../models/story.model');
+const UserSchema = require('../../models/user.model');
 const { agenda } = require('../db')
 const { calculateReadTime } = require('../../utils');
 const { uploadImage } = require('../../helpers/upload.helper');
@@ -91,6 +92,10 @@ agenda.define('process travel story', {
         })
 
         const savedStory = await newStory.save();
+        await UserSchema.findByIdAndUpdate(userId, {
+            $inc: { totalStories: 1 }
+        })
+        
         console.log(`Agenda: Story "${savedStory.title}" processed and saved successfully!`);
 
         // You can update job progress or complete it if needed
