@@ -1,7 +1,7 @@
 const fs = require('fs').promises;
 const { HttpError } = require('../utils')
 const { agenda } = require('../services/db')
-const { getStory, updateViewCount, getStories, addComment, getComments, saveStory, deleteComment } = require('../services/story.services')
+const { getStory, updateViewCount, getStories, addComment, getComments, saveStory, deleteComment, addStoryLike } = require('../services/story.services')
 
 class StoryController {
     async createStory (req, res, next) {
