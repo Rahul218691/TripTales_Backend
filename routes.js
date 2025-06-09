@@ -5,6 +5,7 @@ const { updateUserProfile, getUserProfile } = require('./controllers/user.contro
 const { upload, diskUpload } = require('./helpers/upload.helper');
 const authMiddleware = require('./middlewares/auth.middleware')
 const testMiddleware = require('./middlewares/test.middleware')
+const optionalAuthMiddleware = require('./middlewares/optionalAuth.middleware');
 
 // ============================================== AUTH APIS ====================================================================================== //
 
@@ -30,7 +31,7 @@ router.post('/api/create/story', authMiddleware, diskUpload.fields([
     { name: 'storyVideos', maxCount: 5 }
 ]), createStory)
 
-router.get('/api/story/:id', getStoryDetails)
+router.get('/api/story/:id', optionalAuthMiddleware, getStoryDetails)
 router.patch('/api/story/view/:id', updateStoryViewCount)
 router.patch('/api/story/like/:id', authMiddleware, updateStoryLikeCount)
 router.get('/api/stories', getStoriesList)
