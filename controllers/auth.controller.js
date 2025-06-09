@@ -119,8 +119,18 @@ class AuthController {
         const { triptale_refreshToken: refreshTokenFromCookie } = req.cookies
         try {
             await removeToken(refreshTokenFromCookie)
-            res.clearCookie('triptale_refreshToken')
-            res.clearCookie('triptale_accessToken')
+            res.clearCookie('triptale_refreshToken', {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None',
+                path: '/'
+            });
+            res.clearCookie('triptale_accessToken', {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None',
+                path: '/'
+            });
             res.status(200).json({
                 message: 'Logout successful'
             })
