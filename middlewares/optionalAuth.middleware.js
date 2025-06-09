@@ -2,7 +2,7 @@ const { verifyAccessToken } = require('../services/token.services')
 
 module.exports = async function(req, res, next) {
     try {
-        const accessToken = req.headers.authorization
+        const { triptale_accessToken: accessToken } = req.cookies
         if (!accessToken) {
             req.user = null
             return next()
