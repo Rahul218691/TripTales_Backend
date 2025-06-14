@@ -212,7 +212,17 @@ const getStories = (page, limit, filters, userId) => {
                     },
                     hasSaved: {
                         $cond: {
-                            if: { $and: [userId ? { $in: [String(userId), "$saved"] } : false] },
+                            if: { 
+                                $and: [
+                                    // Ensure userId exists before attempting the $in check
+                                    { $ne: [ "$$userId", null ] }, // Use $$ for aggregation variable, or just userId if from scope
+                                    { $ne: [ "$$userId", "" ] },   // Also check for empty string if userId can be that
+                                    { 
+                                        // Safely check if userId is in the 'saved' array, defaulting to an empty array if 'saved' is missing
+                                        $in: [ String(userId), { $ifNull: ["$saved", []] } ] 
+                                    }
+                                ]
+                            },
                             then: true,
                             else: false
                         }
