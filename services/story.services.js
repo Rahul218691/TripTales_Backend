@@ -3,7 +3,7 @@ const StorySchema = require('../models/story.model')
 const CommentSchema = require('../models/comment.model')
 const UserSchema = require('../models/user.model')
 
- const addOrRemoveUserId = (userId, storyId, fieldName) => {
+const addOrRemoveUserId = (userId, storyId, fieldName) => {
     return new Promise(async (resolve, reject) => {
         try {
             const updatedStory = await StorySchema.findOneAndUpdate(
@@ -13,25 +13,27 @@ const UserSchema = require('../models/user.model')
                         $set: {
                             [fieldName]: {
                                 $cond: {
-                                    if: { $in: [userId, `$${fieldName}`] }, // Check if userId exists in the array
-                                    then: { $setDifference: [`$${fieldName}`, [userId]] }, // Remove userId
-                                    else: { $concatArrays: [`$${fieldName}`, [userId]] } // Add userId
+                                    if: { $in: [userId, { $ifNull: [`$${fieldName}`, []] }] }, // Check if userId exists in the array
+                                    then: { $setDifference: [{ $ifNull: [`$${fieldName}`, []] }, [userId]] }, // Remove userId
+                                    else: { $concatArrays: [{ $ifNull: [`$${fieldName}`, []] }, [userId]] } // Add userId
                                 }
                             }
                         }
                     }
                 ],
-                { new: true }
-            )
+                { new: true } // Return the updated document
+            );
+
             if (!updatedStory) {
                 return reject(new Error('Story not found'));
             }
+
             resolve(updatedStory);
         } catch (error) {
-            reject(error)
+            reject(error);
         }
-    })
- }
+    });
+};
 
  const getStory = (id, userId) => {
     return new Promise(async(resolve, reject) => {
@@ -214,11 +216,7 @@ const getStories = (page, limit, filters, userId) => {
                         $cond: {
                             if: { 
                                 $and: [
-                                    // Ensure userId exists before attempting the $in check
-                                    // { $ne: [ "$$userId", null ] }, // Use $$ for aggregation variable, or just userId if from scope
-                                    // { $ne: [ "$$userId", "" ] },   // Also check for empty string if userId can be that
                                     { 
-                                        // Safely check if userId is in the 'saved' array, defaulting to an empty array if 'saved' is missing
                                         $in: [ String(userId), { $ifNull: ["$saved", []] } ] 
                                     }
                                 ]
