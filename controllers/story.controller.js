@@ -112,7 +112,7 @@ class StoryController {
             if (!id) {
                 return next(new HttpError('Story ID is required', 400))
             }
-            await addStoryLike(id, userId)
+            await addStoryLike(userId, id)
             return res.status(204).send()
         } catch (error) {
             next(error)
@@ -122,6 +122,7 @@ class StoryController {
     async getStoriesList (req, res, next) {
         try {
             let { page, limit, search, tripType, transportation, sortBy, isMyStories, userId } = req.query
+            const user = req?.user?._id || null
             page = page ? Number(page) : 1
             limit = limit ? Number(limit) : 10
             const filters = {
@@ -134,7 +135,7 @@ class StoryController {
                 filters.isMyStories = isMyStories
                 filters.createdBy = userId
             }
-            const result = await getStories(page, limit, filters)
+            const result = await getStories(page, limit, filters, user)
             return res.status(200).json(result)
         } catch (error) {
             next(error)
@@ -186,8 +187,8 @@ class StoryController {
     async addStoryToSaved (req, res, next) {
         try {
             const userId = req.user._id
-            const { storyId, action } = req.body
-            const story = await saveStory(userId, storyId, action)
+            const { id } = req.params
+            const story = await saveStory(userId, id)
             return res.status(200).json(story)
         } catch (error) {
             next(error)

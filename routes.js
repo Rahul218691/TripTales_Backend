@@ -34,11 +34,11 @@ router.post('/api/create/story', authMiddleware, diskUpload.fields([
 router.get('/api/story/:id', optionalAuthMiddleware, getStoryDetails)
 router.patch('/api/story/view/:id', updateStoryViewCount)
 router.patch('/api/story/like/:id', authMiddleware, updateStoryLikeCount)
-router.get('/api/stories', getStoriesList)
+router.get('/api/stories', optionalAuthMiddleware, getStoriesList)
 
 router.post('/api/create/comment', authMiddleware, addStoryComment)
 router.get('/api/comments/:id', getStoryComments)
-router.post('/api/story/save', authMiddleware, addStoryToSaved)
+router.put('/api/story/save/:id', authMiddleware, addStoryToSaved)
 router.delete('/api/delete/comment/:storyId/:commentId', authMiddleware, deleteStoryComment)
 
 // ================================================================================================================================================ //

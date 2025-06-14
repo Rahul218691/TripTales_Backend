@@ -49,6 +49,12 @@ const storySchema = new Schema({
         type: String,
         required: true
     },
+    saved: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'User'
+        }
+    ],
     likes: [
         {
             type: Schema.Types.ObjectId,

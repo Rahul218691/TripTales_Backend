@@ -36,12 +36,6 @@ const userSchema = new Schema({
         default: ''
     },
     feedbacks: [],
-    saved: [
-        {
-            type: Schema.Types.ObjectId,
-            ref: 'Story'
-        }
-    ],
     totalStories: {
         type: Number,
         default: 0

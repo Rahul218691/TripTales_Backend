@@ -3,6 +3,36 @@ const StorySchema = require('../models/story.model')
 const CommentSchema = require('../models/comment.model')
 const UserSchema = require('../models/user.model')
 
+ const addOrRemoveUserId = (userId, storyId, fieldName) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const updatedStory = await StorySchema.findOneAndUpdate(
+                { _id: storyId },
+                [
+                    {
+                        $set: {
+                            [fieldName]: {
+                                $cond: {
+                                    if: { $in: [userId, `$${fieldName}`] }, // Check if userId exists in the array
+                                    then: { $setDifference: [`$${fieldName}`, [userId]] }, // Remove userId
+                                    else: { $concatArrays: [`$${fieldName}`, [userId]] } // Add userId
+                                }
+                            }
+                        }
+                    }
+                ],
+                { new: true }
+            )
+            if (!updatedStory) {
+                return reject(new Error('Story not found'));
+            }
+            resolve(updatedStory);
+        } catch (error) {
+            reject(error)
+        }
+    })
+ }
+
  const getStory = (id, userId) => {
     return new Promise(async(resolve, reject) => {
         try {
@@ -103,40 +133,11 @@ const updateViewCount = (id) => {
     })
 }
 
-const addStoryLike = (storyId, userId) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            // Perform a single atomic update
-            const updatedStory = await StorySchema.findOneAndUpdate(
-                { _id: storyId },
-                [
-                    {
-                        $set: {
-                            likes: {
-                                $cond: {
-                                    if: { $in: [userId, '$likes'] }, // Check if userId exists in the likes array
-                                    then: { $setDifference: ['$likes', [userId]] }, // Remove userId
-                                    else: { $concatArrays: ['$likes', [userId]] } // Add userId
-                                }
-                            }
-                        }
-                    }
-                ],
-                { new: true } // Return the updated document
-            );
-
-            if (!updatedStory) {
-                return reject(new Error('Story not found'));
-            }
-
-            resolve(updatedStory);
-        } catch (error) {
-            reject(error);
-        }
-    })
+const addStoryLike = (userId, storyId) => {
+    return addOrRemoveUserId(userId, storyId, 'likes')
 }
 
-const getStories = (page, limit, filters) => {
+const getStories = (page, limit, filters, userId) => {
     return new Promise(async(resolve, reject) => {
         try {
             const skip = (page - 1) * limit
@@ -208,6 +209,13 @@ const getStories = (page, limit, filters) => {
                         username: '$createdByDetails.username',
                         profileImg: '$createdByDetails.profileImg',
                         profileImgSecureUrl: '$createdByDetails.profileImgSecureUrl'
+                    },
+                    hasSaved: {
+                        $cond: {
+                            if: { $and: [userId ? { $in: [String(userId), "$saved"] } : false] },
+                            then: true,
+                            else: false
+                        }
                     }
                 }
             },
@@ -348,36 +356,8 @@ const getComments = (page, limit, storyId) => {
     })
 }
 
-const saveStory = (userId, storyId, action) => {
-    return new Promise(async(resolve, reject) => {
-        try {
-            let updateOperation;
-
-            if (action === 'add') {
-                // Add the storyId to the saved array
-                updateOperation = { $addToSet: { saved: storyId } };
-            } else if (action === 'remove') {
-                // Remove the storyId from the saved array
-                updateOperation = { $pull: { saved: storyId } };
-            } else {
-                return reject(new Error('Invalid action. Use "add" or "remove".'));
-            }
-
-            const result = await UserSchema.findByIdAndUpdate(
-                userId,
-                updateOperation,
-                { new: true } // Return the updated document
-            );
-
-            if (!result) {
-                return reject(new Error('User not found'));
-            }
-
-            resolve(result);
-        } catch (error) {
-            reject(error)
-        }
-    })
+const saveStory = (userId, storyId) => {
+    return addOrRemoveUserId(userId, storyId, 'saved')
 }
 
 const deleteComment = (storyId, commentId, user) => {
