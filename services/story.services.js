@@ -6,7 +6,7 @@ const UserSchema = require('../models/user.model')
 const addOrRemoveUserId = (userId, storyId, fieldName) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const updatedStory = await StorySchema.findOneAndUpdate(
+            await StorySchema.findOneAndUpdate(
                 { _id: storyId },
                 [
                     {
@@ -24,11 +24,7 @@ const addOrRemoveUserId = (userId, storyId, fieldName) => {
                 { new: true } // Return the updated document
             );
 
-            if (!updatedStory) {
-                return reject(new Error('Story not found'));
-            }
-
-            resolve(updatedStory);
+            resolve(true)
         } catch (error) {
             reject(error);
         }
@@ -165,12 +161,19 @@ const getStories = (page, limit, filters, userId) => {
             if (filters.isMyStories && filters.createdBy) {
                 matchStage.$match.createdBy = new mongoose.Types.ObjectId(String(filters.createdBy));
             }
+
+            // Add saved stories filter
+            if (filters.isSaved && filters.createdBy) {
+                matchStage.$match.saved = { $in: [filters.createdBy] };
+            }
             
             let sortStage = null;
             if (filters.sortBy === 'mostRecent') {
                 sortStage = { $sort: { createdAt: -1 } }; // Sort by most recent (descending)
             } else if (filters.sortBy === 'mostPopular') {
                 sortStage = { $sort: { likes: -1 } }; // Sort by most popular (descending)
+            } else if (filters.sortBy === 'mostCommented') {
+                sortStage = { $sort: { totalComments: -1 } }; // Sort by most commented (descending)
             }
 
             const pipeline = [

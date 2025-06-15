@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { googleSignInUser, logoutUser, refreshUserToken, createTestToken } = require('./controllers/auth.controller');
-const { createStory, getStoryDetails, updateStoryViewCount, updateStoryLikeCount, getStoriesList, addStoryComment, getStoryComments, addStoryToSaved, deleteStoryComment } = require('./controllers/story.controller');
+const { createStory, getStoryDetails, updateStoryViewCount, updateStoryLikeCount, getStoriesList, addStoryComment, getStoryComments, addStoryToSaved, deleteStoryComment, getUserSavedStories } = require('./controllers/story.controller');
 const { updateUserProfile, getUserProfile } = require('./controllers/user.controller');
 const { upload, diskUpload } = require('./helpers/upload.helper');
 const authMiddleware = require('./middlewares/auth.middleware')
@@ -35,6 +35,7 @@ router.get('/api/story/:id', optionalAuthMiddleware, getStoryDetails)
 router.patch('/api/story/view/:id', updateStoryViewCount)
 router.patch('/api/story/like/:id', authMiddleware, updateStoryLikeCount)
 router.get('/api/stories', optionalAuthMiddleware, getStoriesList)
+router.get('/api/user/saved/stories', authMiddleware, getUserSavedStories) // Assuming this endpoint returns saved stories
 
 router.post('/api/create/comment', authMiddleware, addStoryComment)
 router.get('/api/comments/:id', getStoryComments)

@@ -188,8 +188,23 @@ class StoryController {
         try {
             const userId = req.user._id
             const { id } = req.params
-            const story = await saveStory(userId, id)
-            return res.status(200).json(story)
+            await saveStory(userId, id)
+            return res.status(200).json({
+                message: 'Story saved successfully'
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    async getUserSavedStories (req, res, next) {
+        try {
+            const userId = req.user._id
+            let { page, limit } = req.query
+            page = page ? Number(page) : 1
+            limit = limit ? Number(limit) : 10
+            const stories = await getStories(page, limit, { isSaved: true, createdBy: userId })
+            return res.status(200).json(stories)
         } catch (error) {
             next(error)
         }
