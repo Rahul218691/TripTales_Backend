@@ -429,6 +429,7 @@ const deleteStory = (storyId, userId) => {
             await UserSchema.findByIdAndUpdate(createdBy, {
                 $inc: { totalStories: -1 } // Decrement the user's story count
             })
+            await CommentSchema.deleteMany({ storyId: new mongoose.Types.ObjectId(String(storyId)) }); // Delete all comments associated with the story
             resolve({
                 coverImagePublicId,
                 storyImagesPublicIds,
