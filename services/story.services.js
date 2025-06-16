@@ -393,6 +393,50 @@ const deleteComment = (storyId, commentId, user) => {
     })
 }
 
+const deleteStory = (storyId, userId) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            const storyData = await StorySchema.aggregate([
+                {
+                    $match: { _id: new mongoose.Types.ObjectId(String(storyId)) }
+                },
+                {
+                    $project: {
+                        createdBy: 1,
+                        coverImagePublicId: '$coverImage.publicId',
+                        storyImagesPublicIds: {
+                            $map: {
+                                input: '$storyImages',
+                                as: 'image',
+                                in: '$$image.publicId'
+                            }
+                        },
+                        storyVideosPublicIds: {
+                            $map: {
+                                input: '$storyVideos',
+                                as: 'video',
+                                in: '$$video.publicId'
+                            }
+                        }
+                    }
+                }
+            ]);
+            const { createdBy, coverImagePublicId, storyImagesPublicIds, storyVideosPublicIds } = storyData[0];
+            if (String(createdBy) !== String(userId)) {
+                return reject(new Error('You do not have permission to delete this story.'));
+            }
+            await StorySchema.findByIdAndDelete(storyId);
+            resolve({
+                coverImagePublicId,
+                storyImagesPublicIds,
+                storyVideosPublicIds
+            })
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
 module.exports = {
     getStory,
     updateViewCount,
@@ -401,5 +445,6 @@ module.exports = {
     addComment,
     getComments,
     saveStory,
-    deleteComment
+    deleteComment,
+    deleteStory
 }

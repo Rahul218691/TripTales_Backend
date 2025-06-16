@@ -1,7 +1,8 @@
 const fs = require('fs').promises;
 const { HttpError } = require('../utils')
 const { agenda } = require('../services/db')
-const { getStory, updateViewCount, getStories, addComment, getComments, saveStory, deleteComment, addStoryLike } = require('../services/story.services')
+const { getStory, updateViewCount, getStories, addComment, getComments, saveStory, deleteComment, addStoryLike, deleteStory } = require('../services/story.services')
+const { deleteResource } = require('../helpers/upload.helper')
 
 class StoryController {
     async createStory (req, res, next) {
@@ -205,6 +206,21 @@ class StoryController {
             limit = limit ? Number(limit) : 10
             const stories = await getStories(page, limit, { isSaved: true, createdBy: userId })
             return res.status(200).json(stories)
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    async deleteUserStory (req, res, next) {
+        try {
+            const { id } = req.params
+            const userId = req.user._id
+            const { coverImagePublicId, storyImagesPublicIds, storyVideosPublicIds } = await deleteStory(id, userId)
+            const resourceIds = [coverImagePublicId, ...storyImagesPublicIds, ...storyVideosPublicIds]
+            await deleteResource(resourceIds)
+            res.status(200).json({
+                message: 'Story deleted successfully'
+            })
         } catch (error) {
             next(error)
         }
