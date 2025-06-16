@@ -426,6 +426,9 @@ const deleteStory = (storyId, userId) => {
                 return reject(new Error('You do not have permission to delete this story.'));
             }
             await StorySchema.findByIdAndDelete(storyId);
+            await UserSchema.findByIdAndUpdate(createdBy, {
+                $inc: { totalStories: -1 } // Decrement the user's story count
+            })
             resolve({
                 coverImagePublicId,
                 storyImagesPublicIds,
